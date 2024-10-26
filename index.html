@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find the W Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff; /* White background */
+      font-family: Arial, sans-serif;
+      color: #000;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    #level-display, #timer {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    #game-container {
+      display: flex;
+      flex-wrap: wrap;
+      width: 90vw;
+      height: 60vh; /* Adjusted height */
+      overflow-y: auto;
+      justify-content: center; /* Center the letters */
+      align-items: center; /* Center vertically */
+    }
+    .letter {
+      font-size: 2rem; /* Larger font size for visibility */
+      margin: 0; /* Remove margin */
+      padding: 0; /* Remove padding */
+      cursor: pointer;
+      transition: color 0.3s ease;
+      line-height: 0.8; /* Decreased line height for tighter spacing */
+    }
+    .letter:hover {
+      color: #ff0000; /* Change color on hover */
+    }
+    #message {
+      font-size: 1.5rem;
+      color: #ff0000; /* Message color */
+    }
+  </style>
+</head>
+<body>
+  <h1>Find the W!</h1>
+  <div id="level-display">Level: 1</div>
+  <div id="timer">Time: 0.0s</div>
+  <div id="message"></div>
+  <div id="game-container"></div>
+  <script>
+    // Game variables
+    const levels = 10;
+    let currentLevel = 1;
+    let numberOfVs = 25; // Initial count of Vs
+    const vIncrement = 100; // Increase in Vs per level
+    let totalTime = 0; // Total time for the game
+    let startTime, timerInterval;
+    
+    const gameContainer = document.getElementById('game-container');
+    const levelDisplay = document.getElementById('level-display');
+    const messageDisplay = document.getElementById('message');
+    const timerDisplay = document.getElementById('timer');
+
+    // Initialize the game
+    function initializeGame() {
+      gameContainer.innerHTML = ''; // Clear previous letters
+      levelDisplay.textContent = `Level: ${currentLevel}`;
+      messageDisplay.textContent = '';
+      startTime = Date.now(); // Start time for the current level
+      startTimer();
+
+      // Create letters
+      const totalLetters = numberOfVs + 1; // 1 "W" among many "V"s
+      for (let i = 0; i < totalLetters; i++) {
+        const letter = document.createElement('span');
+        letter.classList.add('letter');
+        letter.textContent = i === totalLetters - 1 ? 'W' : 'V'; // All letters are "V" except one "W"
+        letter.style.order = Math.floor(Math.random() * totalLetters); // Randomize positions
+        gameContainer.appendChild(letter);
+        
+        if (letter.textContent === 'W') {
+          letter.addEventListener('click', nextLevel); // Set up click listener on W
+        }
+      }
+    }
+
+    // Timer function
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        timerDisplay.textContent = `Time: ${elapsedTime}s`;
+      }, 100);
+    }
+
+    // Proceed to the next level
+    function nextLevel() {
+      clearInterval(timerInterval);
+      totalTime += (Date.now() - startTime) / 1000; // Add current level time to total time
+      if (currentLevel < levels) {
+        currentLevel++;
+        numberOfVs += vIncrement * 5; // Increased difficulty 5 times
+        messageDisplay.textContent = 'Great! Next Level';
+        setTimeout(initializeGame, 1000); // Brief pause for feedback
+      } else {
+        winGame();
+      }
+    }
+
+    // Win the game
+    function winGame() {
+      clearInterval(timerInterval);
+      messageDisplay.textContent = `You Won! Total Time: ${totalTime.toFixed(1)} seconds`;
+      gameContainer.innerHTML = ''; // Clear game area
+      levelDisplay.textContent = `Level: ${currentLevel}`;
+      timerDisplay.textContent = '';
+    }
+
+    // Start the game
+    initializeGame();
+  </script>
+</body>
+</html>
